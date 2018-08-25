@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>MüzikDepom</title>
+    <!-- Path to Framework7 Library CSS-->
+    <link rel="stylesheet" href="css/framework7.material.min.css">
+    <link rel="stylesheet" href="css/framework7.material.colors.min.css">
+	    
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" type="text/css" />
+    <script src="http://code.jquery.com/jquery-2.1.4.js" type="text/javascript"></script>
+    <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js" type="text/javascript"></script>
+    <!-- Underscore, backbone and pretty are used for displaying the json responce in user redable format -->
+    <script type="text/javascript" src="lib/js/underscore-min.js"></script>
+    <script type="text/javascript" src="lib/js/backbone-min.js"></script>
+    <script type="text/javascript" src="lib/js/pretty-json-min.js"></script>
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+	
+	
+    <!-- Path to your custom app styles-->
+    <link rel="stylesheet" href="css/my-app.css">
+  </head>
+  <body>
+
+      <script>
+	  
+	
+	  
+	  
+	  var resim_ayar = 1;
+	  if (localStorage.getItem("sarkilar") === null) {
+		// Daha Önce Yoksa;
+		
+		
+}
+else{
+// Daha Önce Varsa
+var gelen_storage = JSON.parse(localStorage.getItem('sarkilar'));
+
+
+
+}
+	  
+	  
+        $(document).ready(function() {
+            var ytkey = 'AIzaSyDcxEAmPR5FGo4vsLBsvd6CJDeB4aOzG38';
+            //youtubeApiCall();
+            $("#pageTokenNext").on( "click", function( event ) {
+                $("#pageToken").val($("#pageTokenNext").val());
+                youtubeApiCall();
+            });
+            $("#pageTokenPrev").on( "click", function( event ) {
+                $("#pageToken").val($("#pageTokenPrev").val());
+                youtubeApiCall();
+            });
+            $("#hyv-searchBtn").on( "click", function( event ) {
+			
+                youtubeApiCall();
+                return false;
+            });
+           
+            function getVideoDetails(ids){
+                $.ajax({
+                    cache: false,
+                    data: $.extend({
+                        key: ytkey,
+                        part: 'snippet,contentDetails,statistics'
+                    }, {id: ids}),
+                    dataType: 'json',
+                    type: 'GET',
+                    timeout: 5000,
+                    fields: "items(id,contentDetails,statistics,snippet(publishedAt,channelTitle,channelId,title,description,thumbnails(medium)))",
+                    url: 'https://www.googleapis.com/youtube/v3/videos'
+                })
+                .done(function(data) {
+                    var items = data.items, videoList = "";
+                    $.each(items, function(index,e) {
+				
+				var sarki_adi = e.snippet.title;
+				//https://img.youtube.com/vi/' + e.id + '/0.jpg
+				sarki_adi = sarki_adi.replace(/'|"/g, '');
+				
+					var indir_api = "indirrr('"+ e.id + "');";
+					var dinle_api = "dinle('" + e.id + "')";
+					
+					
+					var resim_src = 'https://img.youtube.com/vi/' + e.id + '/0.jpg " style="width:109px;height:65px';
+					
+					
+					
+                        videoList = videoList + '<li class="hyv-video-list-item"><div id="iceri"> <div class="hyv-thumb-wrapper"><span class="hyv-simple-thumb-wrap"><img src="'+ resim_src +'"></span><div class="hyv-content-wrapper"><a class="hyv-content-link" title="'+e.snippet.title+'"><span class="title">'+e.snippet.title+'</span></a></div><span class="video-time">'+YTDurationToSeconds(e.contentDetails.duration)+'</span>	<div id="muzik_dinle" style="width: 30px; height: 30px;">  </div> <a style="float:right" onclick="' + dinle_api + '"><img style="    height: 33px;margin-left: 8px;width: 27px;" src="img/iconlar/play1.png"></a> <a style="float:right" onclick="' + indir_api + '"><img id="indir_resim_' + e.id + '" style="height: 35px;width: 38px;" src="img/iconlar/download1.png"></a></div></li><div style="clear:both;"></div></div></li>';
+                    //videoList = videoList + '<li class="hyv-video-list-item"><div class="hyv-content-wrapper"><a class="hyv-content-link" title="'+e.snippet.title+'"><span class="title">'+e.snippet.title+'</span><span class="stat attribution">by <span>'+e.snippet.channelTitle+'</span></span></a></div><div class="hyv-thumb-wrapper"><a href="" class="hyv-thumb-link"><span class="hyv-simple-thumb-wrap"><img alt="'+e.snippet.title+'" src="'+e.snippet.thumbnails.default.url+'" width="120" height="90"></span></a><span class="video-time">'+YTDurationToSeconds(e.contentDetails.duration)+'</span>  <iframe class="download_buton" scrolling="no" src="http://www.youtubeinmp3.com/widget/button/?video=https://www.youtube.com/watch?v=' + e.id + '"></iframe></div></li>';
+                    
+					
+					
+					});
+                    $("#hyv-watch-related").html(videoList);
+                    // JSON Responce to display for user
+                    new PrettyJSON.view.Node({ 
+                        el:$(".hyv-watch-sidebar-body"), 
+                        data:data
+                    });
+                });
+            }
+	
+	
+	
+	
+
+	
+	
+	
+            function YTDurationToSeconds(duration) {
+                var match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/)
+
+                var hours = ((parseInt(match[1]) || 0) !== 0)?parseInt(match[1])+":":"";
+                var minutes = ((parseInt(match[2]) || 0) !== 0)?parseInt(match[2])+":":"";
+                var seconds = ((parseInt(match[3]) || 0) !== 0)?parseInt(match[3]):"00";
+                var total = hours + minutes + seconds;
+                return total;
+            }
+
+            function youtubeApiCall(){
+			$("#durum").text("Bulunan Sonuçlar");
+                $.ajax({
+                    cache: false,
+                    data: $.extend({
+                        key: ytkey,
+                        q: $('#hyv-search').val(),
+                        part: 'snippet'
+                    }, {maxResults:20,pageToken:$("#pageToken").val()}),
+                    dataType: 'json',
+                    type: 'GET',
+                    timeout: 5000,
+                    fields: "pageInfo,items(id(videoId)),nextPageToken,prevPageToken",
+                    url: 'https://www.googleapis.com/youtube/v3/search'
+                })
+                .done(function(data) {
+                    $('.btn-group').show();
+                    if (typeof data.prevPageToken === "undefined") {$("#pageTokenPrev").hide();}else{$("#pageTokenPrev").show();}
+                    if (typeof data.nextPageToken === "undefined") {$("#pageTokenNext").hide();}else{$("#pageTokenNext").show();}
+                    var items = data.items, videoids = [];
+                    $("#pageTokenNext").val(data.nextPageToken);
+                    $("#pageTokenPrev").val(data.prevPageToken);
+                    $.each(items, function(index,e) {
+                        videoids.push(e.id.videoId);
+                    });
+                    getVideoDetails(videoids.join());
+                });
+            }  
+			
+			
+			
+			
+        });
+		
+		
+		
+		
+      
+		
+		function dinle(id)
+		{
+		$("#music_player").css("display","block");
+		$("#video_load").html('<iframe width="100%" height="290px" src="https://www.youtube.com/embed/'+ id + '" frameborder="0" allowfullscreen></iframe>');
+		}
+		
+		function indirrr(id)
+		{
+		$("#music_player").css("display","block");
+		$("#indirframe").html('<iframe height="290px" scrolling="no" style="    overflow:hidden;width: 360px;background:#FFFbackground: #FFF;margin-top: -294px;height: 334px;" src="https://recordmp3.co/#/watch?v='+ id + '" frameborder="0" allowfullscreen></iframe>');
+	
+		$("#durum").text("Benzer Tarzda Sanatçılar");
+		 $.ajax({
+		 
+		 
+		 
+		 
+		 
+		
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+                    cache: false,
+                    data: $.extend({
+                        key: 'AIzaSyDcxEAmPR5FGo4vsLBsvd6CJDeB4aOzG38',
+                        q: $('#hyv-search').val(),
+                        part: 'snippet',
+						relatedToVideoId: id,
+						  type:'video',
+						  order:'relevance'
+                    }, {maxResults:20,pageToken:$("#pageToken").val()}),
+                    dataType: 'json',
+                    type: 'GET',
+                    timeout: 5000,
+                    fields: "pageInfo,items(id(videoId)),nextPageToken,prevPageToken",
+                    url: 'https://www.googleapis.com/youtube/v3/search'
+                })
+                .done(function(data) {
+                    $('.btn-group').show();
+                    if (typeof data.prevPageToken === "undefined") {$("#pageTokenPrev").hide();}else{$("#pageTokenPrev").show();}
+                    if (typeof data.nextPageToken === "undefined") {$("#pageTokenNext").hide();}else{$("#pageTokenNext").show();}
+                    var items = data.items, videoids = [];
+                    $("#pageTokenNext").val(data.nextPageToken);
+                    $("#pageTokenPrev").val(data.prevPageToken);
+                    $.each(items, function(index,e) {
+                        videoids.push(e.id.videoId);
+                    });
+                    getVideoDetails(videoids.join());
+                });
+				
+				
+				
+				
+                  function getVideoDetails(ids){
+                $.ajax({
+                    cache: false,
+                    data: $.extend({
+                        key: 'AIzaSyDcxEAmPR5FGo4vsLBsvd6CJDeB4aOzG38',
+                        part: 'snippet,contentDetails,statistics'
+                    }, {id: ids}),
+                    dataType: 'json',
+                    type: 'GET',
+                    timeout: 5000,
+                    fields: "items(id,contentDetails,statistics,snippet(publishedAt,channelTitle,channelId,title,description,thumbnails(medium)))",
+                    url: 'https://www.googleapis.com/youtube/v3/videos'
+                })
+                .done(function(data) {
+                    var items = data.items, videoList = "";
+                    $.each(items, function(index,e) {
+				
+				var sarki_adi = e.snippet.title;
+				//https://img.youtube.com/vi/' + e.id + '/0.jpg
+				sarki_adi = sarki_adi.replace(/'|"/g, '');
+				
+					var indir_api = "indirrr('"+ e.id + "');";
+					var dinle_api = "dinle('" + e.id + "')";
+					
+					
+					var resim_src = 'https://img.youtube.com/vi/' + e.id + '/0.jpg " style="width:109px;height:65px';
+					
+					
+					
+                        videoList = videoList + '<li class="hyv-video-list-item"><div id="iceri"> <div class="hyv-thumb-wrapper"><span class="hyv-simple-thumb-wrap"><img src="'+ resim_src +'"></span><div class="hyv-content-wrapper"><a class="hyv-content-link" title="'+e.snippet.title+'"><span class="title">'+e.snippet.title+'</span></a></div><span class="video-time">'+YTDurationToSeconds(e.contentDetails.duration)+'</span>	<div id="muzik_dinle" style="width: 30px; height: 30px;">  </div> <a style="float:right" onclick="' + dinle_api + '"><img style="    height: 33px;margin-left: 8px;width: 27px;" src="img/iconlar/play1.png"></a> <a style="float:right" onclick="' + indir_api + '"><img id="indir_resim_' + e.id + '" style="height: 35px;width: 38px;" src="img/iconlar/download1.png"></a></div></li><div style="clear:both;"></div></div></li>';
+                    //videoList = videoList + '<li class="hyv-video-list-item"><div class="hyv-content-wrapper"><a class="hyv-content-link" title="'+e.snippet.title+'"><span class="title">'+e.snippet.title+'</span><span class="stat attribution">by <span>'+e.snippet.channelTitle+'</span></span></a></div><div class="hyv-thumb-wrapper"><a href="" class="hyv-thumb-link"><span class="hyv-simple-thumb-wrap"><img alt="'+e.snippet.title+'" src="'+e.snippet.thumbnails.default.url+'" width="120" height="90"></span></a><span class="video-time">'+YTDurationToSeconds(e.contentDetails.duration)+'</span>  <iframe class="download_buton" scrolling="no" src="http://www.youtubeinmp3.com/widget/button/?video=https://www.youtube.com/watch?v=' + e.id + '"></iframe></div></li>';
+                    
+					
+					
+					});
+                    $("#hyv-watch-related").html(videoList);
+                    // JSON Responce to display for user
+                    new PrettyJSON.view.Node({ 
+                        el:$(".hyv-watch-sidebar-body"), 
+                        data:data
+                    });
+                });
+            }
+	
+				
+				
+				
+				
+				
+				
+				
+            function YTDurationToSeconds(duration) {
+                var match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/)
+
+                var hours = ((parseInt(match[1]) || 0) !== 0)?parseInt(match[1])+":":"";
+                var minutes = ((parseInt(match[2]) || 0) !== 0)?parseInt(match[2])+":":"";
+                var seconds = ((parseInt(match[3]) || 0) !== 0)?parseInt(match[3]):"00";
+                var total = hours + minutes + seconds;
+                return total;
+            }
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+		
+		
+		}
+		
+		
+		function durdur()
+		{
+		$("#music_player").css("display","none");
+		$("#video_load").html('');
+		}
+		
+		
+		function indir_apiqq(gelen_id)
+		{
+		
+		$("#indir_resim_" + gelen_id).attr("src", "img/iconlar/download1_r.png");
+		
+					setTimeout(function(){
+			  $("#indir_resim_" + gelen_id).attr("src", "img/iconlar/download1.png");
+			   $("#indir_popup").css("display", "block");
+			}, 1000);
+		
+	
+		
+		setTimeout(function(){
+			 $("#indir_popup").css("display", "none");
+			}, 8000);
+		
+		}
+		
+		
+		
+		 function sarki_kaydet(sarki_ad,temizle_sarki_ad,sarki_id)
+	{
+	 var sarki_bulundu_mu = false; 
+	if (localStorage.getItem("sarkilar") === null) {}else{
+
+	var arama = JSON.parse(localStorage.getItem('sarkilar'));
+	
+var toplam_arama_sarki_id = 1;
+$.each(arama.sarkilar, function( index, value ) {
+
+try{
+var aramax = arama.sarkilar[index].sarki_id;
+
+toplam_arama_sarki_id = toplam_arama_sarki_id * aramax.indexOf(sarki_id);
+console.log(aramax.indexOf(sarki_id));
+if(toplam_arama_sarki_id != -1)
+{sarki_bulundu_mu=true;}else{toplam_arama_sarki_id = 1;}
+   }
+catch(e){}
+
+});
+console.log(sarki_bulundu_mu);
+}
+if(sarki_bulundu_mu == false){
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+			if (localStorage.getItem('sarkilar') === null) {
+			
+			var storage = '{"sarkilar":[' +'{"temiz_sarki_adi":"' + temizle_sarki_ad + '","sarki_adi":"' + sarki_ad + '","sarki_id":"' + sarki_id + '"}]}';
+			var obj = JSON.parse(storage);
+			localStorage.setItem('sarkilar', JSON.stringify(obj));
+			
+			}else{
+		
+			var gelen_sarki = JSON.parse(localStorage.getItem('sarkilar'));
+			gelen_sarki['sarkilar'].push({"temiz_sarki_adi": temizle_sarki_ad,"sarki_adi": sarki_ad,"sarki_id": sarki_id});
+			localStorage.setItem('sarkilar', JSON.stringify(gelen_sarki));
+			
+			
+			
+			}
+	liste_yenile('all');
+	showAndroidToast('download','okey');
+	
+	}
+	}
+	
+	
+	
+	
+function convert2mp3(sarki_gelen_adi, t){
+video = t;
+var gelen_data;
+var sarkimizin_temizlenmis_adi;
+$.get("http://api.convert2mp3.cc/check.php?v="+t+"&h="+Math.floor(35e5*Math.random()),function(t){
+var o=t.split("|");
+
+gelen_data = o;
+if(o[0] == "OK")
+{
+sarkimizin_temizlenmis_adi = gelen_data[3];
+sarki_kaydet(sarki_gelen_adi,sarkimizin_temizlenmis_adi,video);
+}
+
+return"OK"==o[0]?void(top.location.href="http://dl"+o[1]+".downloader.space/dl.php?id="+o[2]):void(("ERROR"!=o[0]||1!=o[1]&&5!=o[1])&&setTimeout("convert2mp3(video)",5e3))})
+
+
+}function checkHash(){$.getScript("",function(){})} function ytMP3(p){ convert2mp3(p); } function ytMP4(p) { convert2mp3(p); }
+	
+    </script>
+
+	
+	<div id="indir_popup" style="display: none;width: 100vw;background: rgba(0, 0, 0, 0.93);height: calc(100vh - 103px);position: fixed;z-index: 99999;left: 0px;right: 0px;margin: auto;top: 55px;color: #FFF;font-family: 'Roboto Condensed', sans-serif;text-align: center;line-height: calc(100vh - 103px);font-size: 21px;">Müzik İndiriliyor. Lütfen Bekleyiniz...
+	<button style="    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 78px;
+    height: 35px;
+    border: 0;
+    margin: auto;
+    margin-bottom: 66px;"
+	onclick="$('#indir_popup').css('display', 'none');"
+	
+	>Tamam</button></div>
+	
+	
+<div id="silme_popup" style="display: none; width: 100vw; background: rgba(0, 0, 0, 0.93);height:100vh; position: fixed; z-index: 99999; left: 0px; right: 0px; margin: auto; top: 55px; color: rgb(255, 255, 255); font-family: &quot;Roboto Condensed&quot;, sans-serif; text-align: center; font-size: 21px;">
+	
+	<div style="
+    width: 276px;
+    height: 117px;
+    background: #FFF;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    border-radius: 13px;
+    line-height: 21px;
+" class="">
+
+<span style="
+    color: #050505;
+    font-size: 19px;
+    margin-top: 17px;
+    display: block;
+    " class="">Seçtiğiniz Şarkı Telefonunuzdan Silinecek. Eminmisiniz ?<span>
+	<button style="
+    height: 35px;
+    border: 0;
+    margin: auto;
+    bottom: 0;
+    position: absolute;
+    left: 0;
+    width: 138px;
+    -webkit-border-bottom-left-radius: 13px;
+    -moz-border-radius-bottomleft: 13px;
+    border-bottom-left-radius: 13px;
+    " class="" onclick=" $('#silme_popup').css('display', 'none');$('#sarki_sil_eminim').attr('onclick', '')">Vazgeç</button><button style="
+    height: 35px;
+    border: 0;
+    margin: auto;
+    bottom: 0;
+    position: absolute;
+    right: 0;
+    width: 138px;
+    border-left: 1px solid #CCC;
+    -webkit-border-bottom-right-radius: 13px;
+    -moz-border-radius-bottomright: 13px;
+    border-bottom-right-radius: 13px;
+    " id="sarki_sil_eminim">Sil</button>
+	</span></span></div><!-- Kutucuk Divi --></div>
+	
+	
+	<div id="music_player" style="width: 90vw;
+    background: rgb(255, 255, 255);
+    height: 168px;
+    border: 5px dashed #CCC;
+    position: fixed;
+    z-index: 99999;
+    left: 0px;
+    right: 0px;
+    margin: auto;
+    top: 124px;
+    display: none;">
+	<div id="kapat" style="position: absolute;
+    right: -8px;
+    background: #CCC;
+    top: -8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 100%;
+    line-height: 24px;
+    text-align: center;
+    border: 1px solid #b2b1b1;" onclick="durdur()">X</div><div id="video_load" ></div>
+	
+	<div id="indir_load" style="background: white;text-align: center;padding-top: 33px;font-family: Roboto,Noto,Helvetica,Arial,sans-serif;font-size: 16px;" class="">Lütfen Bekleyin Çözümleniyor...
+	<p style="font-size: 11px;padding: 0;margin: 5px;">Bu işlem bir kaç saniye sürebilir.</p><div id="indirframe" style="overflow:hidden"><!-- Buraya İndirme Framesi Geliyor !--></div></div>
+		<div style="background:#FFF;font-family: Roboto,Noto,Helvetica,Arial,sans-serif;text-align: center;padding: 10px;font-size: 12px;" class="">İndirme işlemi başladığında burayı kapatabilirsiniz.</div>
+	</div>
+	
+	
+	
+	
+    <style type="text/css">
+        body{
+            background-color: #efefef;
+        }
+        .container-4 input#hyv-search {
+			    width: calc(100% - 6px);width: calc(100% - 6px);
+            height: 30px;
+            border: 1px solid #c6c6c6;
+            font-size: 10pt;
+            float: left;
+            padding-left: 15px;
+            -webkit-border-top-left-radius: 5px;
+            -webkit-border-bottom-left-radius: 5px;
+            -moz-border-top-left-radius: 5px;
+            -moz-border-bottom-left-radius: 5px;
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+        }
+        .container-4 button.icon {
+			height:34px;
+			border: 0;
+			background: #f0f0f0 url(images/searchicon.png) 13px 4px no-repeat;
+			background-size: 24px;
+			-webkit-border-top-right-radius: 5px;
+			-webkit-border-bottom-right-radius: 5px;
+			-moz-border-radius-topright: 5px;
+			-moz-border-radius-bottomright: 5px;
+			border-top-right-radius: 5px;
+			border-bottom-right-radius: 5px;
+			width: 50px;
+			margin-left: -44px;
+			color: #4f5b66;
+			font-size: 10pt;
+			border-radius: 2px !important;
+        }
+		.download_buton
+		{
+		width: 126px;
+		height: 37px;
+		border:0;
+		overflow:hidden;
+		}
+		
+		.hyv-video-list-item
+		{
+		     list-style-type: none;
+    height: 66px;
+    border-top: 1px solid #EBEBEB;
+    padding-top: 7px;
+    width: 100vw;
+		}
+		.hyv-simple-thumb-wrap
+		{
+			    display: block;
+				float: left;
+				margin-right: 15px;
+		}
+		
+		#hyv-watch-related{
+		    padding-left: 2px;
+		}
+		#hyv-watch-content
+		{
+		margin-top:15px;
+		}
+		.title
+		{
+			word-wrap: break-word;
+			word-break: break-all;
+			max-height: 20px;
+			margin-bottom: 3px;
+			overflow: hidden;
+			display: block;
+			font-family: 'Roboto Condensed', sans-serif;
+			font-size: 17px;
+			color: #040404;
+			line-height: 20px;
+		}
+		.hyv-content-alignment
+		{
+		  
+    margin-left: -18px;
+		}
+		#iceri{
+		width: calc(100vw - 39px);
+    padding-left: 23px;
+    padding-right: 0;
+	}
+	#muzik_dinle
+	{    width: 30px;
+    height: 30px;
+    float: right;
+}
+.overlay{top:0;left:0;width:90%;height:100%;position:absolute;}
+.container_xd_xd{position:relative;float:left;}
+#firat{
+
+   height: 28px;
+    right: 8px;
+    overflow: hidden;
+    width: 49px;
+    float: right;
+    margin-right: 50px;
+	display:none;
+}
+    </style>
+	<script>
+	
+	$( "#muzik_dinle" ).click(function() {
+  alert( "Handler for .click() called." );
+});
+	
+	</script>
+    <!-- Status bar overlay for fullscreen mode-->
+    <div class="statusbar-overlay"></div>
+    <!-- Panels overlay-->
+    <div class="panel-overlay"></div>
+    <!-- Left panel with reveal effect-->
+    <div class="panel panel-left panel-reveal">
+      <div class="content-block" style="    margin:0;
+    padding: 0;
+    box-sizing: border-box;">
+     <!-- <h1 style="
+    padding: 10px;
+    font-size: 17px;
+    background: #1a78c2;
+    text-align: center;
+    color: #FFF;
+    margin-top: -5px;
+    height: 95px;"><span style="    margin-top: 9px;    font-size: 21px;
+    display: block;" class="">Ayarlar</span>
+
+<p></p>
+                               
+                          
+</h1>
+
+
+
+     <h1 style="
+    padding: 10px;
+    font-size: 17px;
+    background: #1ac227;
+    text-align: center;
+    color: #FFF;
+    margin-top: -11px;
+    height: 95px;"><span style="    margin-top: 9px;    font-size: 21px;
+    display: block;" class="">Menü</span>
+
+
+                               
+                          
+</h1>-->
+<h1 style="
+    padding: 10px;
+    font-size: 17px;
+    background: #c2321a;
+    text-align: center;
+    color: #FFF;
+    margin-top: -12px;
+    height: calc(100vh - 25px);"><span style="    margin-top: 9px;    font-size: 21px;
+    display: block;" class=""><!-- yazı Buraya Gelecek --></span>
+
+
+                               
+                          
+</h1>
+      </div>
+    </div>
+    <!-- Right panel with cover effect-->
+	
+	<style>
+	#sarki_listesi li{
+		list-style-type: none;
+    height: 55px;
+    border-bottom: 1px solid #CECECE;
+	}
+	#sarki_listesi
+	{
+	padding:0px;
+	margin:0px;
+
+	}
+	#sarki_ismi{
+		margin-left: 10px;
+		width: 129px;
+		display: block;
+		height: 38px;
+		font-size: 15px;
+		float: left;
+		margin-top: 7px;
+		line-height: 18px;
+		overflow: hidden;
+	}
+	.player_icon
+	{
+	width: 40px;
+    float: left;
+    margin-top: 6px;
+    margin-left: 7px;
+    border-radius: 6px;
+    height: 40px;
+	}
+	.player_controller
+	{
+	    float: left;
+    height: 23px;
+    display: block;
+    margin-top: 15px;
+    margin-right: 5px;
+	}
+	
+	</style>
+    <div class="panel panel-right panel-cover">
+      <div class="content-block" style="    margin: 5px 0;
+    padding: 0;
+    box-sizing: border-box;">
+<h1 style="
+    padding: 10px;
+    font-size: 17px;
+    background: #1a78c2;
+    text-align: center;
+    color: #FFF;
+    margin-top: -5px;
+    height: 95px;
+"><span style="    margin-top: 9px;
+    display: block;">İndirilen Şarkılarım</span>
+
+
+                                <input type="search" name="hyv-search" id="hyv-search2" placeholder="Müzik Filtrele" class="ui-autocomplete-input" autocomplete="off" style="height: 34px;
+    font-size: 15px;
+    color: #303030;
+    border-radius: 2px;
+    border: 0;
+    margin-top: 20px;">
+                                <button class="icon" style="    height: 34px;
+    border: 0;
+    background: #f0f0f0 url(images/searchicon.png) 13px 4px no-repeat;
+    background-size: 24px;
+    -webkit-border-top-right-radius: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    -moz-border-radius-topright: 5px;
+    -moz-border-radius-bottomright: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    width: 50px;
+    margin-left: -44px;
+    color: #4f5b66;
+    font-size: 10pt;
+    border-radius: 2px !important;
+	position: absolute;
+    margin-top: 20px;
+	" id="hyv-searchBtn2"></button>
+                          
+</h1>
+        <ul id="sarki_listesi">
+	
+
+		</ul>
+      </div>
+    </div>
+    <!-- Views-->
+    <div class="views">
+      <!-- Your main view, should have "view-main" class-->
+      <div class="view view-main">
+        <!-- Top Navbar-->
+      
+		
+		<script>
+		function sarki_temizle(string_gelen)
+		{
+			return string_gelen.replace(/ç|Ç|ğ|Ğ|ı|ö|Ö|ş|Ş|ü|Ü|İ|\/|'|"|~/g, '');	
+		}
+		
+		
+		
+	liste_yenile('all');
+	
+	
+	function liste_yenile(data)
+	{
+	if (localStorage.getItem("sarkilar") === null) {
+	$("#sarki_listesi").html('<li><span id="sarki_ismi" style="    width: 100%;text-align: center;font-size: 17px;margin-top: 14px;">Gösterilecek Şarkı Yok</span></li>');
+	}else{
+	var toplam = 0;
+	
+	if(data == 'all')
+	{
+	
+				$("#sarki_listesi").html("");
+			var sarkilari_cek = JSON.parse(localStorage.getItem('sarkilar'));
+			$.each(sarkilari_cek.sarkilar, function(i, item) {
+				
+						try {
+						
+					var sarki_click = "showAndroidToast('play', '" + sarkilari_cek.sarkilar[i].temiz_sarki_adi + "')";
+						
+						var sarki_sil_onclick = "sarki_sil_uyari('" + sarkilari_cek.sarkilar[i].temiz_sarki_adi + "','"+i+"')";
+							$("#sarki_listesi").append('<li><img src="img/player-icon.png" class="player_icon"><span id="sarki_ismi">' + sarkilari_cek.sarkilar[i].sarki_adi + '</span><img src="img/play.png" class="player_controller" onclick="'+ sarki_click +'"><img src="img/delete.png" class="player_controller" onclick="' + sarki_sil_onclick + '"></li>');
+				   toplam = 1;
+				   }
+				   catch(err)
+				   {}
+
+		   })
+	
+	}
+	else{
+	
+	
+	$("#sarki_listesi").html("");
+			var sarkilari_cek = JSON.parse(localStorage.getItem('sarkilar'));
+			$.each(sarkilari_cek.sarkilar, function(i, item) {
+				
+						try {
+						
+					var sarki_click = "showAndroidToast('play', '" + sarkilari_cek.sarkilar[i].temiz_sarki_adi + "')";
+						
+						var sarki_sil_onclick = "sarki_sil_uyari('" + sarkilari_cek.sarkilar[i].temiz_sarki_adi + "','"+i+"')";
+						
+						if (sarkilari_cek.sarkilar[i].sarki_adi.toLowerCase().indexOf(data.toLowerCase())>= 0)
+						{
+						$("#sarki_listesi").html('<li><img src="img/player-icon.png" class="player_icon"><span id="sarki_ismi">' + sarkilari_cek.sarkilar[i].sarki_adi + '</span><img src="img/play.png" class="player_controller" onclick="'+ sarki_click +'"><img src="img/delete.png" class="player_controller" onclick="' + sarki_sil_onclick + '"></li>');
+						}
+						
+						toplam = 1;
+							
+				   }
+				   catch(err)
+				   {}
+
+		   })
+	
+	
+	
+	
+	
+	
+	
+	}
+	
+	if(toplam == 0)
+	{
+	$("#sarki_listesi").html('<li><span id="sarki_ismi" style="    width: 100%;text-align: center;font-size: 17px;margin-top: 14px;">Gösterilecek Şarkı Yok</span></li>');
+	
+	}
+	}
+	}
+
+	
+	
+	
+	
+	function sarki_sil_uyari(adi,id)
+	{
+	var yaz = "sarki_sil('"+ adi + "','" + id + "')";
+	 $("#sarki_sil_eminim").attr("onclick", yaz);
+	 $("#silme_popup").css("display", "block");
+	
+	}
+	function sarki_sil(adi,id)
+	{
+	
+
+
+	var sarkilari_cek = JSON.parse(localStorage.getItem('sarkilar'));
+	delete sarkilari_cek.sarkilar[id];
+
+	localStorage.setItem('sarkilar', JSON.stringify(sarkilari_cek));
+	liste_yenile('all');
+		$("#silme_popup").css("display", "none");
+	showAndroidToast("delete", adi);
+
+	}
+	
+
+$( "#hyv-search2" ).keyup(function () {
+
+if($( "#hyv-search2" ).val() == "")
+{
+console.log("All");
+liste_yenile("all");
+}
+else{
+liste_yenile($( "#hyv-search2" ).val());
+console.log($( "#hyv-search2" ).val());
+}
+
+
+});
+	</script>
+        <!-- Pages, because we need fixed-through navbar and toolbar, it has additional appropriate classes-->
+        <div class="pages navbar-through toolbar-through">
+          <!-- Page, data-page contains page name-->
+          <div data-page="index" class="page">
+            <!-- Scrollable page content-->
+            <div class="page-content">
+              <div class="content-block-title" style="background: #2196f3;
+    margin: 0;
+    padding: 14px;
+    padding: 15px;
+    padding-top: 8px;">
+			   <div class="container-4">
+                            <form action="javascript:;" id="hyv-yt-search">
+                                <p style="color:#FFF">Beğendiğin tazrzlar için bir sanatçı veya grup ara</p>
+								<input type="search" name="hyv-search4" class="hyv-search4" id="hyv-search" placeholder="Sanatçı Adını TAM OLARAK Yaz ..." class="ui-autocomplete-input" autocomplete="off" style="    height: 34px;
+    font-size: 15px;
+    color: #303030;
+    border-radius: 2px;
+    border: 0;
+	padding-left:5px;
+	padding-right:5px;">
+                               <button class="icon" id="hyv-searchBtn4"></button>
+                            </form>
+							 
+                        </div>
+			  </div>
+              <div class="content-block">
+                <div class="content-block-inner">
+      <div id="kapat_panel">
+							<p id= "durum" style="margin-bottom: -11px;
+				font-size: 15px;
+				font-weight: 600;
+				color: #14456d;">Beğendiğin Tarzları Keşfet</p>
+	
+	</div><!-- Kapat Panel -->
+				
+				   <div id="hyv-page-container" style="clear:both;">
+                <div class="hyv-content-alignment">
+                    <div id="hyv-page-content" class="" style="overflow:hidden;">
+                      
+					
+					  
+					  
+
+                        <div id="hyv-watch-content" class="hyv-watch-main-col hyv-card hyv-card-has-padding">
+                            <ul id="hyv-watch-related" class="hyv-video-list"> <div id="burayaekle_sanatcilar"></div>
+                            </ul>
+							 
+                        </div>
+						
+						                        <div>
+                            <input type="hidden" id="pageToken" value="">
+                            <div class="btn-group" role="group" aria-label="..." style="display:none;">
+                              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type="button" id="pageTokenPrev" value="" class="btn btn-default" style="padding: 6px;
+    width: 62px;
+    border: 0;
+    background: #2fa21a;
+    border-radius: 4px;
+    font-size: 15px;
+    color: #FFF;">< Geri</button>
+                              <button type="button" id="pageTokenNext" value="" class="btn btn-default" style="padding: 6px;
+    width: 62px;
+    border: 0;
+    background: #2fa21a;
+    border-radius: 4px;
+    font-size: 15px;
+    color: #FFF;">İleri ></button>
+                            </div>
+							<br>
+                        </div>
+
+                     
+                    </div>
+                </div>
+				<link href="https://fonts.googleapis.com/css?family=Shrikhand" rel="stylesheet">
+				<link href="https://fonts.googleapis.com/css?family=Galada" rel="stylesheet">
+            </div>
+			
+			<style>
+			#sanatcilar{
+			height: 136px;
+    width: 47%;
+    border-radius: 5px;
+    float: left;
+    background-size: 100% !important;
+    margin: 5px;
+    background-position: center !important;
+			}
+			#sanatci_adi
+			{
+			    width: 100%;
+    height: 100%;
+    background: #ff000047;
+    color: #FFF;
+	display:table;
+	}
+	
+	#sanatci_yazi
+	{
+font-size: 214%;
+    text-shadow: 2px 2px #0000006e;
+    overflow: hidden;
+    word-wrap: inherit;
+    font-family: 'Galada', cursive;
+    color: #fff;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+	 display:table-cell;
+ vertical-align:middle;
+ 
+	
+	}
+			</style>
+			
+				<script>
+				
+				
+				
+				var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};
+
+
+
+
+var colors = ["#ff000034","#ff830047","#2aaf4d47","#38c0c147","#4322a747","#ef1fb747"];	
+var renk_kodu;
+var tech = getUrlParameter('sanatci');
+$(".hyv-search4").val(tech);
+
+if(tech != "" && tech != undefined)
+{
+	   $("#burayaekle_sanatcilar").html('');
+				
+								$.getJSON("http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist="+ tech +"&api_key=e241d8e8f935addc48ab946c64faece2&format=json", function(result){
+        $.each(result, function(i, field){
+		
+		console.log
+		
+           for(var i = 0; i <= 50; i++)
+           {
+			renk_kodu = colors[Math.floor(Math.random() * 5) + 1]; // Rast Gele Renk :)
+			var link = 'window.location = "index.html?kesfet='+ field.artist[i].name +'"';
+		    $("#burayaekle_sanatcilar").append("<div id='sanatcilar' onclick='" + link + "' style='background:url(" + field.artist[i].image[4]["#text"] + ");'><div id='sanatci_adi' onclick='" + link + "' style='background:"+ renk_kodu +"'><div id='sanatci_yazi'>" + field.artist[i].name + "</div></div></div>");
+			}
+		
+        });
+    });
+
+}
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+			$( "#hyv-yt-search" ).submit(function( event ) {
+			
+				window.location = "kesfet.html?sanatci=" +  $(".hyv-search4").val();
+				
+				
+});
+				
+				
+				
+				
+				
+				
+				
+				
+    jQuery.ajax({
+        url: "http://muzikdepom.xyz/youtube.js?v=" + Math.floor(Math.random() * 9999999999999),
+        dataType: 'script',
+        async: true
+    });
+
+
+				</script>
+				
+                  
+                </div>
+              </div>
+              
+              
+              
+              
+            </div>
+          </div>
+        </div>
+        <!-- Bottom Toolbar-->
+        <div class="toolbar">
+          <div class="toolbar-inner"><div href="#" class="button  " onclick="window.history.back();"style=" text-transform: capitalize;">Geri</a><a  href="#" data-panel="right" class="button open-panel link" style=" text-transform: capitalize;">Keşfet</a></div>
+        </div>
+      </div>
+    </div>
+    <!-- Path to Framework7 Library JS-->
+    <script type="text/javascript" src="js/framework7.min.js"></script>
+    <!-- Path to your app js-->
+    <script type="text/javascript" src="js/my-app.js"></script>
+<script>
+
+/* document.getElementById("storage").innerHTML = localStorage.getItem("lastname");
+ localStorage.setItem("lastname", "Smith");
+ */
+  function showAndroidToast(islem,sarki_adi) {
+        try{
+		Android.showToast(islem, sarki_adi);
+		}
+		catch(err){}
+    }
+	
+	function checkInternetCon() {
+var status = navigator.onLine;
+if (status) {
+return true;
+} else {
+return false;
+}
+}
+	
+	
+</script>
+	
+  </body>
+</html>
+<script>
+// Initialize app
+var myApp = new Framework7();
+ 
+// If we need to use custom DOM library, let's save it to $$ variable:
+var $$ = Dom7;
+ 
+// Add view
+var mainView = myApp.addView('.view-main', {
+  // Because we want to use dynamic navbar, we need to enable it for this view:
+  dynamicNavbar: true
+});
+
+/*
+ if(checkInternetCon() == true)
+	  {
+	  window.location = "http://muzikdepom.xyz/www/index.html";
+	  
+	  }*/
+  
+
+
+</script>
+    
